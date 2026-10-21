@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한눈에 쏙! 근현대사 십자말풀이</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Pretendard Web Font for high legibility -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        body {
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #E6F4F1;
+            color: #2D3748;
+            letter-spacing: -0.01em;
+            word-break: keep-all;
+        }
+        /* Custom highlight for UDL readability */
+        .key-highlight {
+            background-color: #FEF08A;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.375rem;
+            font-weight: 700;
+            color: #854D0E;
+        }
+        /* Touch friendly sizing and high accessibility */
+        .cell-box {
+            transition: all 0.2s ease-in-out;
+            user-select: none;
+        }
+        .cell-selected {
+            background-color: #FEF3C7 !important;
+            border-color: #F59E0B !important;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.4);
+        }
+        .cell-correct {
+            background-color: #DCFCE7 !important;
+            border-color: #22C55E !important;
+            color: #15803D !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-teal-200">
+
+    <!-- Header & Score Bar -->
+    <header class="bg-white/90 backdrop-blur-md border-b-2 border-teal-100 shadow-sm sticky top-0 z-20">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-400 text-amber-950 p-2.5 rounded-2xl shadow-inner font-black text-xl">
+                    🇰🇷
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
+                        한눈에 쏙! 근현대사 십자말풀이
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium">느린 학습자를 위한 알기 쉬운 한국사 이야기</p>
+                </div>
+            </div>
+
+            <!-- Stats Badge Group -->
+            <div class="flex items-center gap-3 bg-amber-50 px-4 py-2 rounded-2xl border border-amber-200">
+                <div class="flex items-center gap-1.5" title="보유 포인트">
+                    <i class="fa-solid fa-star text-amber-500 text-lg"></i>
+                    <span id="user-points" class="font-bold text-lg text-slate-800">0</span>
+                    <span class="text-xs text-slate-500 font-bold">P</span>
+                </div>
+                <div class="h-4 w-[2px] bg-amber-200"></div>
+                <div class="flex items-center gap-1.5" title="연속 정답 스트릭">
+                    <i class="fa-solid fa-fire text-orange-500 text-lg"></i>
+                    <span id="streak-count" class="font-bold text-lg text-slate-800">0</span>
+                    <span class="text-xs text-slate-500 font-bold">연속</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto w-full px-4 py-6 flex-grow flex flex-col gap-6">
+        
+        <!-- Stage Selection Controls -->
+        <nav class="flex justify-center gap-2 sm:gap-4">
+            <button onclick="switchStage('beginner')" id="btn-stage-beginner" class="stage-btn flex-1 max-w-[160px] py-3 px-4 rounded-2xl font-bold text-base sm:text-lg border-2 border-amber-300 bg-amber-400 text-amber-950 shadow-sm transition-all hover:brightness-105 active:scale-95">
+                🌱 초급
+            </button>
+            <button onclick="switchStage('intermediate')" id="btn-stage-intermediate" class="stage-btn flex-1 max-w-[160px] py-3 px-4 rounded-2xl font-bold text-base sm:text-lg border-2 border-slate-200 bg-white text-slate-600 shadow-sm transition-all hover:bg-slate-50 active:scale-95">
+                🌿 중급
+            </button>
+            <button onclick="switchStage('advanced')" id="btn-stage-advanced" class="stage-btn flex-1 max-w-[160px] py-3 px-4 rounded-2xl font-bold text-base sm:text-lg border-2 border-slate-200 bg-white text-slate-600 shadow-sm transition-all hover:bg-slate-50 active:scale-95">
+                🌳 고급
+            </button>
+        </nav>
+
+        <!-- Game Area Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Crossword Grid View (Left Column) -->
+            <section class="lg:col-span-7 bg-white rounded-3xl p-4 sm:p-6 border-2 border-amber-100 shadow-sm flex flex-col items-center justify-center min-h-[380px]">
+                <div id="grid-container" class="relative bg-slate-100 p-2 sm:p-3 rounded-2xl border-2 border-slate-200 shadow-inner max-w-full overflow-x-auto">
+                    <!-- Dynamic Grid will be rendered here by JavaScript -->
+                </div>
+                <p class="text-xs sm:text-sm text-slate-400 mt-4 flex items-center gap-1.5 font-medium">
+                    <i class="fa-solid fa-hand-pointer text-amber-500"></i>
+                    퍼즐 칸을 터치하면 문제가 나타납니다.
+                </p>
+            </section>
+
+            <!-- Hint & Input Section (Right Column) -->
+            <section class="lg:col-span-5 flex flex-col gap-4">
+                
+                <!-- Hint Display Box -->
+                <div class="bg-white rounded-3xl p-5 border-2 border-amber-100 shadow-sm flex flex-col gap-3">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <span id="clue-badge" class="bg-amber-100 text-amber-900 font-bold px-3 py-1 rounded-full text-sm">
+                            [힌트: 단어를 선택하세요]
+                        </span>
+                        <!-- TTS Button -->
+                        <button onclick="speakCurrentHint()" title="음성으로 읽어주기" class="bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-900 p-2.5 rounded-xl transition-all flex items-center gap-1.5 font-bold text-xs active:scale-95">
+                            <i class="fa-solid fa-volume-high text-base text-amber-600"></i>
+                            읽어주기
+                        </button>
+                    </div>
+
+                    <!-- Question Text -->
+                    <div id="clue-text" class="text-lg sm:text-xl font-medium leading-relaxed text-slate-800 min-h-[80px] flex items-center">
+                        퍼즐 판에서 낱말 칸을 선택해 주세요! 💡
+                    </div>
+
+                    <!-- Choseong Hint Result Display -->
+                    <div id="choseong-display" class="hidden bg-amber-50 border border-amber-200 p-3 rounded-2xl flex items-center gap-2 text-amber-900 font-bold">
+                        <span class="text-xs bg-amber-200 text-amber-950 px-2 py-0.5 rounded-md">초성 힌트</span>
+                        <span id="choseong-text" class="text-xl tracking-widest font-black"></span>
+                    </div>
+
+                    <!-- Hint Purchase Action Buttons -->
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button onclick="useInitialHint()" class="bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold py-2.5 px-3 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all active:scale-95">
+                            <i class="fa-regular fa-lightbulb text-amber-600"></i>
+                            초성 힌트 (-5P)
+                        </button>
+                        <button onclick="useLetterHint()" class="bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-900 font-bold py-2.5 px-3 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all active:scale-95">
+                            <i class="fa-solid fa-key text-orange-600"></i>
+                            한 글자 열기 (-15P)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Answer Input & Submission Box -->
+                <div class="bg-white rounded-3xl p-5 border-2 border-amber-100 shadow-sm flex flex-col gap-4">
+                    <label class="text-sm font-bold text-slate-500 flex items-center gap-1">
+                        <i class="fa-solid fa-pen-to-square text-amber-500"></i> 정답 입력하기
+                    </label>
+
+                    <!-- Dynamic Input Cells Container -->
+                    <div id="input-cells-container" class="flex flex-wrap justify-center gap-2 min-h-[56px] items-center">
+                        <!-- Inputs will be dynamically generated -->
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button onclick="submitAnswer()" class="w-full bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-lg py-3.5 px-6 rounded-2xl shadow-sm border-2 border-amber-300 transition-all active:scale-98 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check text-xl"></i>
+                        정답 확인하기
+                    </button>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-100 border-t border-slate-200 py-4 text-center text-xs sm:text-sm text-slate-500 font-medium">
+        보편적 학습 설계(UDL) 기반 느린 학습자용 한국사 교육 웹 앱
+    </footer>
+
+    <!-- Custom UDL Friendly Modal (No disruptive default alerts) -->
+    <div id="custom-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full border-4 border-amber-200 shadow-2xl flex flex-col items-center text-center gap-4 animate-bounce-short">
+            <div id="modal-icon" class="text-5xl">💡</div>
+            <h3 id="modal-title" class="text-xl font-black text-slate-800">안내</h3>
+            <p id="modal-message" class="text-base font-medium text-slate-600 leading-relaxed">메시지 내용</p>
+            <button onclick="closeModal()" class="w-full bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold py-3 px-6 rounded-2xl border border-amber-300 text-base transition-all active:scale-95 mt-2">
+                확인했어요
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 100% Pure Korean Database (No numbers, no English)
+        const GAME_DATA = {
+            beginner: [
+                { id: "b1", answer: "유관순", initial_sound: "ㅇㄱㅅ", hint: "아우내 장터에서 태극기를 나눠주며 대한 독립 만세 운동을 이끈 대표적인 여성 독립운동가는 누구일까요?", x: 1, y: 1, direction: "across", number: 1 },
+                { id: "b2", answer: "고종", initial_sound: "ㄱㅈ", hint: "나라의 이름을 '대한제국'으로 바꾸고 스스로 조선의 첫 번째 황제가 된 왕은 누구일까요?", x: 6, y: 1, direction: "across", number: 2 },
+                { id: "b3", answer: "안중근", initial_sound: "ㅇㅈㄱ", hint: "하얼빈역에서 우리나라를 침략한 일본의 앞잡이 이토 히로부미를 처단한 독립운동가는 누구일까요?", x: 6, y: 3, direction: "across", number: 3 },
+                { id: "b4", answer: "독도", initial_sound: "ㄷㄷ", hint: "경상북도 울릉군에 속해 있으며, 일본이 자기 땅이라고 우기지만 옛날부터 전해 내려온 우리나라 동쪽 끝의 영토는 어디일까요?", x: 8, y: 5, direction: "down", number: 4 },
+                { id: "b5", answer: "만세운동", initial_sound: "ㅁㅅㅇㄷ", hint: "고종 황제가 세상을 떠난 해에, 온 국민이 거리로 나와 \"대한 독립 만세\"를 외친 평화 운동은 무엇일까요?", x: 4, y: 6, direction: "across", number: 5 },
+                { id: "b6", answer: "김구", initial_sound: "ㄱㄱ", hint: "대한민국 임시정부의 주석(지도자)을 지냈으며, '나의 소원'이라는 글을 남긴 독립운동가는 누구일까요?", x: 1, y: 6, direction: "across", number: 6 },
+                { id: "b7", answer: "한국전쟁", initial_sound: "ㅎㄱㅈㅈ", hint: "백만구백오십년에 북한군의 침략으로 시작되어, 우리 민족에게 큰 아픔을 준 동족상잔의 전쟁은 무엇일까요?", x: 3, y: 3, direction: "down", number: 7 },
+                { id: "b8", answer: "백두산", initial_sound: "ㅂㄷㅅ", hint: "애국가 일절에 등장하며, 한반도에서 가장 높고 꼭대기에 천지라는 호수가 있는 산은 어디일까요?", x: 5, y: 8, direction: "across", number: 8 },
+                { id: "b9", answer: "광복", initial_sound: "ㄱㅂ", hint: "일제의 억압에서 벗어나 빼앗긴 나라와 빛을 되찾았다는 뜻의 기념일은 무엇일까요?", x: 3, y: 4, direction: "across", number: 9 },
+                { id: "b10", answer: "대한민국", initial_sound: "ㄷㅎㅁㄱ", hint: "상하이 임시정부의 법통을 이어받아 정식으로 세워진 우리나라의 공식 국호(이름)는 무엇일까요?", x: 2, y: 3, direction: "across", number: 10 }
+            ],
+            intermediate: [
+                { id: "i1", answer: "대한제국", initial_sound: "ㄷㅎㅈㄱ", hint: "고종 황제가 러시아 공사관에서 돌아와 선포한 우리나라 최초의 황제 국가는 무엇일까요?", x: 1, y: 2, direction: "across", number: 1 },
+                { id: "i2", answer: "을사늑약", initial_sound: "ㅇㅅㄴㅇ", hint: "일본이 총칼로 위협하여 우리나라의 외교권을 강제로 빼앗아 간 불평등 조약은 무엇일까요?", x: 2, y: 10, direction: "across", number: 2 },
+                { id: "i3", answer: "안창호", initial_sound: "ㅇㅊㅎ", hint: "신민회를 조직하고 흥사단을 세워 민족의 실력을 키우기 위해 노력한 독립운동가는 누구일까요?", x: 1, y: 8, direction: "across", number: 3 },
+                { id: "i4", answer: "국채보상운동", initial_sound: "ㄱㅊㅂㅅㅇㄷ", hint: "대구에서 시작되어 국민들이 힘을 모아 일본에 진 나랏빚을 갚기 위해 벌인 운동은 무엇일까요?", x: 4, y: 2, direction: "down", number: 4 },
+                { id: "i5", answer: "독립문", initial_sound: "ㄷㄹㅁ", hint: "독립협회가 청나라의 사신을 맞이하던 문을 헐고, 자주독립의 의지를 보여주기 위해 세운 문은 무엇일까요?", x: 6, y: 1, direction: "down", number: 5 },
+                { id: "i6", answer: "임시정부", initial_sound: "ㅇㅅㅈㅂ", hint: "만세 운동 직후, 독립운동을 체계적으로 이끌기 위해 중국 상하이에 세운 민주 공화제 정부는 무엇일까요?", x: 3, y: 8, direction: "down", number: 6 },
+                { id: "i7", answer: "봉오동전투", initial_sound: "ㅂㅇㄷㅈㅌ", hint: "홍범도 장군이 이끄는 독립군이 일본군을 상대로 크게 승리한 첫 번째 대규모 전투는 무엇일까요?", x: 7, y: 3, direction: "across", number: 7 },
+                { id: "i8", answer: "청산리대첩", initial_sound: "ㅊㅅㄹㄷㅊ", hint: "김좌진 장군과 홍범도 장군이 힘을 합쳐 일본군을 크게 무찌른 일제강점기 최고의 전투는 무엇일까요?", x: 10, y: 1, direction: "down", number: 8 },
+                { id: "i9", answer: "윤봉길", initial_sound: "ㅇㅂㄱ", hint: "중국 상하이 홍커우 공원에서 도시락 모양과 물통 모양의 폭탄을 던져 일본의 주요 인물들을 처단한 인물**은 누구일까요?", x: 7, y: 6, direction: "across", number: 9 },
+                { id: "i10", answer: "물산장려운동", initial_sound: "ㅁㅅㅈㄹㅇㄷ", hint: "일제강점기 실력양성운동의 하나로, \"내 살림 내 것으로\"라는 구호를 외치며 국산품을 쓰자고 한 운동**은 무엇일까요?", x: 1, y: 6, direction: "across", number: 10 },
+                { id: "i11", answer: "사일구혁명", initial_sound: "ㅅㅇㄱㅎㅁ", hint: "이승만 정부의 독재와 부정선거에 맞서 학생들이 중심이 되어 일어난 민주화 운동은 무엇일까요?", x: 8, y: 8, direction: "across", number: 11 },
+                { id: "i12", answer: "광주민주화운동", initial_sound: "ㄱㅈㅁㅈㅎㅇㄷ", hint: "전두환 군사 독재 정권의 무력 탄압에 맞서 시민들이 민주주의를 지키기 위해 벌인 운동**은 무엇일까요?", x: 5, y: 11, direction: "across", number: 12 },
+                { id: "i13", answer: "이산가족", initial_sound: "ㅇㅅㄱㅈ", hint: "전쟁으로 인해 북한과 남한으로 갈라져 서로 만나지 못하고 헤어진 가족들을 무엇이라 부를까요?", x: 1, y: 12, direction: "across", number: 13 },
+                { id: "i14", answer: "새마을운동", initial_sound: "ㅅㅁㅇㅇㄷ", hint: "박정희 정부 시절, 농촌을 근대화하고 잘살기 위해 추진한 우리나라의 대표적인 농촌 개발 운동**은 무엇일까요?", x: 6, y: 8, direction: "down", number: 14 },
+                { id: "i15", answer: "유월민주항쟁", initial_sound: "ㅇㅇㅁㅈㅎㅈ", hint: "국민들의 희생을 계기삼아 대통령 직접 선거(직선제)를 이끌어낸 전국적인 민주화 운동은 무엇일까요?", x: 11, y: 6, direction: "down", number: 15 }
+            ],
+            advanced: [
+                { id: "a1", answer: "광무개혁", initial_sound: "ㄱㅁㄱㅎ", hint: "대한제국 시기 고종 황제가 추진한 개혁으로, **'옛것을 근본으로 새것을 참작함'의 원칙을 세운 개혁**은 무엇일까요?", x: 1, y: 2, direction: "across", number: 1 },
+                { id: "a2", answer: "신민회", initial_sound: "ㅅㅁㅎ", hint: "안창호, 양기탁 등이 비밀리에 조직한 단체로, **공화정 바탕의 독립국가 건설과 신흥무관학교 설립을 추진한 곳**은 어디일까요?", x: 5, y: 1, direction: "down", number: 2 },
+                { id: "a3", answer: "헤이그특사", initial_sound: "ㅎㅇㄱㅌㅅ", hint: "고종이 을사늑약의 부당함을 알리기 위해 **네덜란드 만국평화회의에 파견한 세 분의 사절**을 무엇이라 할까요?", x: 1, y: 5, direction: "across", number: 3 },
+                { id: "a4", answer: "신간회", initial_sound: "ㅅㄱㅎ", hint: "민족주의 세력과 사회주의 세력이 손을 잡고 만든 **일제강점기 최대 규모의 민족 협동 전선 단체**는 무엇일까요?", x: 5, y: 3, direction: "across", number: 4 },
+                { id: "a5", answer: "의열단", initial_sound: "ㅇㅇㄷ", hint: "신흥무관학교 출신인 신채호, 김원봉 등이 중심이 되어 조직한 **대표적인 무장 독립운동 단체**는 무엇일까요?", x: 3, y: 6, direction: "across", number: 5 },
+                { id: "a6", answer: "광주학생항일운동", initial_sound: "ㄱㅈㅎㅅㅎㅇㅇㄷ", hint: "한일 학생 간의 충돌을 계기로 일어나 **삼일 운동 이후 가장 큰 규모로 전개된 학생 중심 항일 운동**은 무엇일까요?", x: 1, y: 8, direction: "across", number: 6 },
+                { id: "a7", answer: "한국광복군", initial_sound: "ㅎㄱㅂㄱ", hint: "중국 충칭에서 창설된 **대한민국 임시정부 공식 군대**의 이름은 무엇일까요?", x: 2, y: 10, direction: "across", number: 7 },
+                { id: "a8", answer: "모스크바삼상회의", initial_sound: "ㅁㅅㅋㅂㅅㅅㅎㅇ", hint: "광복 직후 미국, 영국, 소련의 외교관들이 모여 **한반도의 신탁 통지 문제와 임시정부 수립을 논의한 회의**는 무엇일까요?", x: 1, y: 12, direction: "across", number: 8 },
+                { id: "a9", answer: "경제개발계획", initial_sound: "ㄱㅈㄱㅂㄱㅎ", hint: "정부가 주도하여 산업 구조를 근대화하고 **수출 중심의 경제 성장을 이루기 위해 추진한 장기 국가 계획**은 무엇일까요?", x: 8, y: 1, direction: "down", number: 9 },
+                { id: "a10", answer: "외환위기", initial_sound: "ㅇㅎㅇㄱ", hint: "우리나라의 달러가 부족해져 **국제통화기금에 구제금융을 신청했던 국가적 경제 위기 상황**을 무엇이라 할까요?", x: 10, y: 8, direction: "down", number: 10 }
+            ]
+        };
+
+        // Global Game State
+        let currentStage = 'beginner';
+        let userPoints = 0;
+        let streakCount = 0;
+        let activeWordId = null;
+        let solvedWords = new Set();
+        let openedHints = {}; // { wordId: { initial: boolean, revealedIndices: [] } }
+
+        // Points structure by Stage
+        const STAGE_POINTS = {
+            beginner: 10,
+            intermediate: 20,
+            advanced: 30
+        };
+
+        window.onload = function() {
+            switchStage('beginner');
+        };
+
+        function switchStage(stageKey) {
+            currentStage = stageKey;
+            activeWordId = null;
+
+            // Update tab UI buttons
+            document.querySelectorAll('.stage-btn').forEach(btn => {
+                btn.className = "stage-btn flex-1 max-w-[160px] py-3 px-4 rounded-2xl font-bold text-base sm:text-lg border-2 border-slate-200 bg-white text-slate-600 shadow-sm transition-all hover:bg-slate-50 active:scale-95";
+            });
+            const activeBtn = document.getElementById(`btn-stage-${stageKey}`);
+            if (activeBtn) {
+                activeBtn.className = "stage-btn flex-1 max-w-[160px] py-3 px-4 rounded-2xl font-bold text-base sm:text-lg border-2 border-amber-300 bg-amber-400 text-amber-950 shadow-sm transition-all hover:brightness-105 active:scale-95";
+            }
+
+            renderBoard();
+            resetHintPanel();
+        }
+
+        function renderBoard() {
+            const container = document.getElementById('grid-container');
+            container.innerHTML = '';
+
+            const words = GAME_DATA[currentStage];
+            
+            // Calculate max grid bounds dynamically
+            let maxX = 8, maxY = 8;
+            words.forEach(w => {
+                const endX = w.direction === 'across' ? w.x + w.answer.length - 1 : w.x;
+                const endY = w.direction === 'down' ? w.y + w.answer.length - 1 : w.y;
+                if (endX > maxX) maxX = endX;
+                if (endY > maxY) maxY = endY;
+            });
+
+            // Grid CSS Layout setup
+            container.style.display = 'grid';
+            container.style.gridTemplateColumns = `repeat(${maxX}, minmax(36px, 48px))`;
+            container.style.gridTemplateRows = `repeat(${maxY}, minmax(36px, 48px))`;
+            container.style.gap = '4px';
+
+            // Map cells
+            const cellMap = {};
+            words.forEach(w => {
+                for (let i = 0; i < w.answer.length; i++) {
+                    const cx = w.direction === 'across' ? w.x + i : w.x;
+                    const cy = w.direction === 'down' ? w.y + i : w.y;
+                    const key = `${cx},${cy}`;
+
+                    if (!cellMap[key]) {
+                        cellMap[key] = { x: cx, y: cy, words: [], number: null, letter: w.answer[i] };
+                    }
+                    cellMap[key].words.push(w.id);
+                    if (i === 0 && !cellMap[key].number) {
+                        cellMap[key].number = w.number;
+                    }
+                }
+            });
+
+            // Render cells into matrix
+            for (let r = 1; r <= maxY; r++) {
+                for (let c = 1; c <= maxX; c++) {
+                    const key = `${c},${r}`;
+                    const cellData = cellMap[key];
+
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = "relative rounded-xl flex items-center justify-center font-black text-base sm:text-lg cell-box border";
+
+                    if (cellData) {
+                        cellDiv.className += " bg-white border-slate-300 text-slate-800 cursor-pointer hover:border-amber-400 shadow-sm";
+                        cellDiv.dataset.key = key;
+
+                        // Display number indicator
+                        if (cellData.number) {
+                            const numSpan = document.createElement('span');
+                            numSpan.className = "absolute top-0.5 left-1 text-[10px] text-amber-700 font-bold leading-none";
+                            numSpan.innerText = cellData.number;
+                            cellDiv.appendChild(numSpan);
+                        }
+
+                        // Text element
+                        const textSpan = document.createElement('span');
+                        textSpan.id = `cell-text-${key}`;
+                        textSpan.className = "z-10";
+
+                        // Check if solved
+                        const isSolved = cellData.words.every(wid => solvedWords.has(wid));
+                        if (isSolved) {
+                            textSpan.innerText = cellData.letter;
+                            cellDiv.classList.add('cell-correct');
+                        }
+
+                        cellDiv.appendChild(textSpan);
+
+                        // Cell click action
+                        cellDiv.onclick = () => {
+                            selectWord(cellData.words[0]);
+                        };
+                    } else {
+                        // Empty background slot
+                        cellDiv.className += " bg-slate-200/50 border-transparent";
+                    }
+
+                    container.appendChild(cellDiv);
+                }
+            }
+        }
+
+        function selectWord(wordId) {
+            activeWordId = wordId;
+            const words = GAME_DATA[currentStage];
+            const word = words.find(w => w.id === wordId);
+            if (!word) return;
+
+            // Highlight cells on board
+            document.querySelectorAll('.cell-box').forEach(el => el.classList.remove('cell-selected'));
+
+            for (let i = 0; i < word.answer.length; i++) {
+                const cx = word.direction === 'across' ? word.x + i : word.x;
+                const cy = word.direction === 'down' ? word.y + i : word.y;
+                const cellEl = document.querySelector(`[data-key="${cx},${cy}"]`);
+                if (cellEl && !cellEl.classList.contains('cell-correct')) {
+                    cellEl.classList.add('cell-selected');
+                }
+            }
+
+            // Update Clue Box
+            const clueBadge = document.getElementById('clue-badge');
+            clueBadge.innerText = `[힌트: ${'O'.repeat(word.answer.length)} - ${word.answer.length}글자]`;
+
+            // Format bold text for keyword highlighting
+            let formattedHint = word.hint.replace(/\*\*(.*?)\*\*/g, '<span class="key-highlight">$1</span>');
+            document.getElementById('clue-text').innerHTML = formattedHint;
+
+            // Update Choseong Display if unlocked
+            updateChoseongUI(wordId);
+
+            // Generate Input Boxes
+            renderInputCells(word);
+        }
+
+        function renderInputCells(word) {
+            const container = document.getElementById('input-cells-container');
+            container.innerHTML = '';
+
+            const isSolved = solvedWords.has(word.id);
+
+            for (let i = 0; i < word.answer.length; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.maxLength = 1;
+                input.className = "w-11 h-12 text-center text-xl font-black rounded-xl border-2 border-slate-300 focus:border-amber-400 focus:bg-amber-50 outline-none transition-all shadow-sm";
+                input.dataset.index = i;
+
+                // Check letter hints or solved status
+                const hintInfo = openedHints[word.id];
+                if (isSolved) {
+                    input.value = word.answer[i];
+                    input.disabled = true;
+                    input.classList.add('bg-green-100', 'border-green-400', 'text-green-800');
+                } else if (hintInfo && hintInfo.revealedIndices && hintInfo.revealedIndices.includes(i)) {
+                    input.value = word.answer[i];
+                    input.disabled = true;
+                    input.classList.add('bg-amber-100', 'border-amber-400', 'text-amber-800');
+                }
+
+                // Keyboard Navigation logic
+                input.oninput = (e) => {
+                    if (e.target.value) {
+                        const nextInput = container.querySelector(`input[data-index="${i + 1}"]`);
+                        if (nextInput) nextInput.focus();
+                    }
+                };
+
+                input.onkeydown = (e) => {
+                    if (e.key === 'Backspace' && !e.target.value) {
+                        const prevInput = container.querySelector(`input[data-index="${i - 1}"]`);
+                        if (prevInput) prevInput.focus();
+                    } else if (e.key === 'Enter') {
+                        submitAnswer();
+                    }
+                };
+
+                container.appendChild(input);
+            }
+
+            // Focus first editable input
+            if (!isSolved) {
+                const firstEmpty = container.querySelector('input:not([disabled])');
+                if (firstEmpty) firstEmpty.focus();
+            }
+        }
+
+        function submitAnswer() {
+            if (!activeWordId) {
+                showModal("💡 단어 선택 필요", "먼저 십자말풀이 판에서 풀고 싶은 단어를 선택해 주세요!");
+                return;
+            }
+
+            const word = GAME_DATA[currentStage].find(w => w.id === activeWordId);
+            if (!word) return;
+
+            if (solvedWords.has(word.id)) {
+                showModal("✨ 이미 맞힌 문제", "이미 정답을 맞힌 문제입니다! 다른 문제를 풀어보세요.");
+                return;
+            }
+
+            // Gather inputs
+            const inputs = document.querySelectorAll('#input-cells-container input');
+            let userString = "";
+            inputs.forEach(inp => userString += inp.value.trim());
+
+            if (userString.length < word.answer.length) {
+                showModal("✏️ 글자 수 부족", "모든 칸에 정답 글자를 입력해 주세요!");
+                return;
+            }
+
+            // Check Correct Answer
+            if (userString === word.answer) {
+                // Mark solved
+                solvedWords.add(word.id);
+                
+                // Score & Streak calculation
+                const baseReward = STAGE_POINTS[currentStage];
+                streakCount++;
+                let bonus = 0;
+                if (streakCount % 3 === 0) {
+                    bonus = 5; // Bonus for 3 consecutive correct answers
+                }
+                userPoints += (baseReward + bonus);
+
+                updateScoreUI();
+                renderBoard();
+                selectWord(word.id);
+
+                let rewardMsg = `<b>+${baseReward} 포인트</b>를 획득했습니다!`;
+                if (bonus > 0) {
+                    rewardMsg += `<br><span class="text-orange-600 font-bold">🔥 3연속 성공 보너스 +5P 추가!</span>`;
+                }
+
+                showModal("🎉 참 잘했어요!", `정답입니다! <br>${rewardMsg}`, "🌟");
+            } else {
+                // Reset streak gently on error without screen shaking
+                streakCount = 0;
+                updateScoreUI();
+                showModal("💡 다시 생각해 볼까요?", "아쉽게도 정답이 아니에요.<br>힌트를 다시 읽어보고 차근차근 풀어보세요!", "🤔");
+            }
+        }
+
+        function useInitialHint() {
+            if (!activeWordId) {
+                showModal("💡 단어 선택 필요", "힌트를 사용할 단어를 먼저 선택해 주세요.");
+                return;
+            }
+
+            if (userPoints < 5) {
+                showModal("⭐ 포인트 부족", "초성 힌트를 사용하려면 <b>5 포인트</b>가 필요해요.<br>정답을 맞혀 포인트를 모아보세요!", "🪙");
+                return;
+            }
+
+            if (!openedHints[activeWordId]) openedHints[activeWordId] = { initial: false, revealedIndices: [] };
+
+            if (openedHints[activeWordId].initial) {
+                showModal("✨ 힌트 이미 열림", "이미 초성 힌트를 확인하셨습니다.");
+                return;
+            }
+
+            userPoints -= 5;
+            openedHints[activeWordId].initial = true;
+            updateScoreUI();
+            updateChoseongUI(activeWordId);
+            showModal("💡 초성 힌트 열림", "초성 힌트가 아래에 공개되었습니다!", "🔓");
+        }
+
+        function useLetterHint() {
+            if (!activeWordId) {
+                showModal("💡 단어 선택 필요", "힌트를 사용할 단어를 먼저 선택해 주세요.");
+                return;
+            }
+
+            const word = GAME_DATA[currentStage].find(w => w.id === activeWordId);
+            if (!word || solvedWords.has(word.id)) return;
+
+            if (userPoints < 15) {
+                showModal("⭐ 포인트 부족", "한 글자 열기를 사용하려면 <b>15 포인트</b>가 필요해요.", "🪙");
+                return;
+            }
+
+            if (!openedHints[activeWordId]) openedHints[activeWordId] = { initial: false, revealedIndices: [] };
+
+            const revealed = openedHints[activeWordId].revealedIndices;
+            
+            // Find unrevealed indices
+            const unrevealed = [];
+            for (let i = 0; i < word.answer.length; i++) {
+                if (!revealed.includes(i)) unrevealed.push(i);
+            }
+
+            if (unrevealed.length === 0) {
+                showModal("✨ 힌트 이미 완결", "모든 글자가 이미 열려있습니다.");
+                return;
+            }
+
+            // Pick random position to reveal
+            const randIdx = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+            revealed.push(randIdx);
+
+            userPoints -= 15;
+            updateScoreUI();
+            renderInputCells(word);
+            showModal("🔍 한 글자 공개!", `'<b>${word.answer[randIdx]}</b>' 글자가 입력창에 채워졌습니다!`, "🔑");
+        }
+
+        function updateChoseongUI(wordId) {
+            const word = GAME_DATA[currentStage].find(w => w.id === wordId);
+            const displayBox = document.getElementById('choseong-display');
+            const displayText = document.getElementById('choseong-text');
+
+            if (word && openedHints[wordId] && openedHints[wordId].initial) {
+                displayBox.classList.remove('hidden');
+                displayText.innerText = word.initial_sound;
+            } else {
+                displayBox.classList.add('hidden');
+            }
+        }
+
+        function speakCurrentHint() {
+            if (!activeWordId) {
+                showModal("💡 읽어주기 안내", "먼저 읽어들을 퀴즈 문제를 선택해 주세요.");
+                return;
+            }
+
+            const word = GAME_DATA[currentStage].find(w => w.id === activeWordId);
+            if (!word) return;
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop current speech
+                const cleanText = word.hint.replace(/\*\*/g, '');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'ko-KR';
+                utterance.rate = 0.85; // Natural slow speech speed for slow learners
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showModal("🔊 음성 미지원", "사용 중인 브라우저가 음성 읽어주기를 지원하지 않습니다.");
+            }
+        }
+
+        function updateScoreUI() {
+            document.getElementById('user-points').innerText = userPoints;
+            document.getElementById('streak-count').innerText = streakCount;
+        }
+
+        function resetHintPanel() {
+            document.getElementById('clue-badge').innerText = '[힌트: 단어를 선택하세요]';
+            document.getElementById('clue-text').innerText = '퍼즐 판에서 낱말 칸을 선택해 주세요! 💡';
+            document.getElementById('choseong-display').classList.add('hidden');
+            document.getElementById('input-cells-container').innerHTML = '';
+        }
+
+        function showModal(title, message, icon = "💡") {
+            document.getElementById('modal-title').innerHTML = title;
+            document.getElementById('modal-message').innerHTML = message;
+            document.getElementById('modal-icon').innerText = icon;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
